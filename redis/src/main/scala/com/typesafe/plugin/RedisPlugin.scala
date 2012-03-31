@@ -81,7 +81,7 @@ class RedisPlugin(app: Application) extends CachePlugin {
           throw new IOException("could not serialize: "+ value.toString)
        }
        val redisV = prefix + "-" + new String( Base64Coder.encode( baos.toByteArray() ) )  
-       Logger.warn(redisV)
+       //Logger.warn(redisV)
        sedisPool.withJedisClient { client =>
           client.set(key,redisV)
           if (expiration != 0) client.expire(key,expiration)
@@ -136,6 +136,16 @@ class RedisPlugin(app: Application) extends CachePlugin {
        if (dis != null) dis.close()
       }
     }
-
+    
+  def del(key:String) = {
+    try {
+        val data: Long =  sedisPool.withJedisClient { client =>
+            client.del(key)
+        }
+    } catch { case ex: Exception =>
+      Logger.warn("could not deserialize key:"+ key+ " ex:"+ex.toString)
+      ex.printStackTrace()
+    }
+  }
   }
 }
